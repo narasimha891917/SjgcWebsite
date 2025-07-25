@@ -2,168 +2,133 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login & Register</title>
+  <title>Login App</title>
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <!-- Modern CSS -->
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(to right, #8e2de2, #4a00e0);
+      background: #f0f2f5;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
     }
-
     .container {
-      background: #fff;
-      padding: 30px 40px;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 320px;
       text-align: center;
-      width: 300px;
     }
-
-    .container h2 {
+    h2 {
       margin-bottom: 20px;
       color: #333;
     }
-
     input {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
     }
-
     button {
-      width: 100%;
-      padding: 12px;
-      background: #4a00e0;
+      background: #007bff;
       color: white;
+      padding: 10px 15px;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
+      border-radius: 6px;
+      margin: 5px 0;
+      width: 100%;
       cursor: pointer;
-      margin: 10px 0;
-      transition: background 0.3s;
+      font-size: 16px;
     }
-
     button:hover {
-      background: #3b00b3;
+      background: #0056b3;
     }
-
-    #message {
+    .msg {
       margin-top: 10px;
       font-weight: bold;
-    }
-
-    .success {
       color: green;
     }
-
     .error {
       color: red;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .welcome {
-      color: #fff;
-      text-align: center;
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h2>Login App</h2>
+    <input type="email" id="email" placeholder="Enter Email" required>
+    <input type="password" id="password" placeholder="Enter Password" required>
+    <button onclick="createAccount()">Create Account</button>
+    <button onclick="login()">Login</button>
+    <div id="message" class="msg"></div>
+  </div>
 
-<div class="container" id="authBox">
-  <h2>Firebase Login</h2>
-  <input type="email" id="email" placeholder="Email" required />
-  <input type="password" id="password" placeholder="Password" required />
-  <button onclick="createAccount()">Create Account</button>
-  <button onclick="login()">Login</button>
-  <div id="message"></div>
-</div>
+  <!-- Hidden Content After Login -->
+  <div class="container" id="welcome" style="display:none;">
+    <h1>Heading 1</h1>
+    <h2>Heading 2</h2>
+    <h3>Heading 3</h3>
+    <h4>Heading 4</h4>
+    <h5>Heading 5</h5>
+    <h6>Heading 6</h6>
+    <button onclick="logout()">Logout</button>
+  </div>
 
-<div class="welcome hidden" id="welcomeBox">
-  <h1>Welcome!</h1>
-  <h2>This is H2</h2>
-  <h3>This is H3</h3>
-  <h4>This is H4</h4>
-  <h5>This is H5</h5>
-  <h6>This is H6</h6>
-</div>
+  <script>
+    // Your Firebase Config (Replace with your actual config)
+    const firebaseConfig = {
+  apiKey: "AIzaSyAlEo10-imB1Hj8oEu4iNf6KD1iDREXbdc",
+  authDomain: "results-dashboard.firebaseapp.com",
+  projectId: "results-dashboard",
+  storageBucket: "results-dashboard.firebasestorage.app",
+  messagingSenderId: "465722379609",
+  appId: "1:465722379609:web:d995f495bb4d7e61b05048",
+  measurementId: "G-B2W818CL13"
+};
 
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-  // ✅ Your Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyAlEo10-imB1Hj8oEu4iNf6KD1iDREXbdc",
-    authDomain: "results-dashboard.firebaseapp.com",
-    projectId: "results-dashboard",
-    storageBucket: "results-dashboard.firebasestorage.app",
-    messagingSenderId: "465722379609",
-    appId: "1:465722379609:web:d995f495bb4d7e61b05048",
-    measurementId: "G-B2W818CL13"
-  };
+    function showMessage(msg, isError = false) {
+      const el = document.getElementById("message");
+      el.textContent = msg;
+      el.className = isError ? "msg error" : "msg";
+    }
 
+    function createAccount() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(() => showMessage("✅ Account Created Successfully"))
+        .catch((error) => showMessage("❌ " + error.message, true));
+    }
 
-  // ✅ Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+    function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          showMessage("✅ Login Successful");
+          document.querySelector(".container").style.display = "none";
+          document.getElementById("welcome").style.display = "block";
+        })
+        .catch((error) => showMessage("❌ " + error.message, true));
+    }
 
-  // ✅ DOM Elements
-  const emailInput = document.getElementById('email');
-  const passwordInput = document.getElementById('password');
-  const messageDiv = document.getElementById('message');
-  const authBox = document.getElementById('authBox');
-  const welcomeBox = document.getElementById('welcomeBox');
-
-  // ✅ Create Account
-  window.createAccount = () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        messageDiv.textContent = "Registration Successful ✅";
-        messageDiv.className = "success";
-        showWelcome();
-      })
-      .catch((error) => {
-        messageDiv.textContent = error.message;
-        messageDiv.className = "error";
+    function logout() {
+      auth.signOut().then(() => {
+        document.getElementById("welcome").style.display = "none";
+        document.querySelector(".container").style.display = "block";
+        showMessage("Logged out successfully");
       });
-  };
-
-  // ✅ Login
-  window.login = () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
-        messageDiv.textContent = "Login Successful ✅";
-        messageDiv.className = "success";
-        showWelcome();
-      })
-      .catch((error) => {
-        messageDiv.textContent = "Login Failed ❌ " + error.message;
-        messageDiv.className = "error";
-      });
-  };
-
-  function showWelcome() {
-    authBox.classList.add('hidden');
-    welcomeBox.classList.remove('hidden');
-  }
-</script>
-
+    }
+  </script>
 </body>
 </html>
