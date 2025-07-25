@@ -1,91 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Firebase Login Example</title>
-  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth-compat.js"></script>
+  <meta charset="UTF-8" />
+  <title>Login with Firebase</title>
+  <script type="module">
+    // ✅ Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // ✅ Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD_5OXqGIcR2yH_nGC8GVgmLwJfJaQnmuw",
+      authDomain: "student-dashboard-821ae.firebaseapp.com",
+      projectId: "student-dashboard-821ae",
+      storageBucket: "student-dashboard-821ae.appspot.com",
+      messagingSenderId: "785480958148",
+      appId: "1:785480958148:web:bb187cfe8d969aafca0991",
+      measurementId: "G-01QDZ9VRJ4"
+    };
+
+    // ✅ Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // ✅ Create Account
+    window.createAccount = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert("Account created successfully!");
+      } catch (error) {
+        alert("Error: " + error.message);
+      }
+    }
+
+    // ✅ Login
+    window.login = async function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert("Login successful!");
+      } catch (error) {
+        alert("Login failed: " + error.message);
+      }
+    }
+
+    // ✅ After Login - Show h1 to h6
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("auth-section").style.display = "none";
+        document.getElementById("welcome").style.display = "block";
+      } else {
+        document.getElementById("auth-section").style.display = "block";
+        document.getElementById("welcome").style.display = "none";
+      }
+    });
+
+    // ✅ Logout
+    window.logout = function () {
+      signOut(auth);
+    };
+  </script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 40px;
+      padding: 30px;
+      background: #f2f2f2;
     }
     input, button {
       padding: 10px;
-      margin: 5px;
-      width: 240px;
+      margin: 10px;
+      width: 200px;
     }
-    #mainContent {
+    #welcome {
       display: none;
-      margin-top: 30px;
     }
   </style>
 </head>
 <body>
 
-  <h2>🔐 Firebase Login</h2>
-
-  <div id="authSection">
-    <input type="email" id="email" placeholder="Enter Email"><br>
-    <input type="password" id="password" placeholder="Enter Password"><br>
+  <div id="auth-section">
+    <h2>Firebase Login</h2>
+    <input type="email" id="email" placeholder="Enter Email" required /><br />
+    <input type="password" id="password" placeholder="Enter Password" required /><br />
     <button onclick="login()">Login</button>
-    <button onclick="signup()">Create Account</button>
+    <button onclick="createAccount()">Create Account</button>
   </div>
 
-  <div id="mainContent">
-    <h1>Heading 1</h1>
-    <h2>Heading 2</h2>
-    <h3>Heading 3</h3>
-    <h4>Heading 4</h4>
-    <h5>Heading 5</h5>
-    <h6>Heading 6</h6>
+  <div id="welcome">
+    <h1>Welcome!</h1>
+    <h1>This is H1</h1>
+    <h2>This is H2</h2>
+    <h3>This is H3</h3>
+    <h4>This is H4</h4>
+    <h5>This is H5</h5>
+    <h6>This is H6</h6>
     <button onclick="logout()">Logout</button>
   </div>
 
-  <script>
-    // ✅ Firebase config — corrected
-    const firebaseConfig = {
-      apiKey: "AIzaSyAlEo10-imB1Hj8oEu4iNf6KD1iDREXbdc",
-      authDomain: "results-dashboard.firebaseapp.com",
-      projectId: "results-dashboard",
-      storageBucket: "results-dashboard.appspot.com", // 🔁 FIXED HERE
-      messagingSenderId: "465722379609",
-      appId: "1:465722379609:web:d995f495bb4d7e61b05048",
-      measurementId: "G-B2W818CL13"
-    };
-
-    // ✅ Initialize Firebase & auth
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // ✅ Auth state change
-    auth.onAuthStateChanged(user => {
-      document.getElementById("authSection").style.display = user ? "none" : "block";
-      document.getElementById("mainContent").style.display = user ? "block" : "none";
-    });
-
-    // ✅ Login
-    function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => alert("✅ Login successful!"))
-        .catch(err => alert("❌ " + err.message));
-    }
-
-    // ✅ Signup
-    function signup() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(() => alert("✅ Account created!"))
-        .catch(err => alert("❌ " + err.message));
-    }
-
-    // ✅ Logout
-    function logout() {
-      auth.signOut().then(() => alert("👋 Logged out!"));
-    }
-  </script>
 </body>
 </html>
